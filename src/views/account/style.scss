@@ -1,12 +1,13 @@
 .account {
   width: 100vw;
   height: 100vh;
-  background-color: #666;
+  background: linear-gradient(to right bottom, #16222A, #3A6073);
   display: flex;
   align-items: center;
   justify-content: center;
   .form-wrap {
     width: 285px;
+    margin-top: -100px;
     label {
       display: block;
       color: #fff
