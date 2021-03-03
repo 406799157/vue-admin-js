@@ -4,5 +4,9 @@ export function verifyPhone(value) {
 }
 
 export function verifyPassword(value) {
-  return true;
+  return /^(?!\D+$)(?![^a-zA-Z]+$)\S{6,20}$/.test(value);
+}
+
+export function verifyCode(value) {
+  return /^[0-9a-zA-Z]{6}$/.test(value);
 }

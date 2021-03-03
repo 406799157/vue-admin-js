@@ -7,12 +7,14 @@
 <script>
   import { ref } from "vue";
   export default {
-    setup(props) {
+    props: [ "robotCheck" ],
+    setup(props, context) {
       let captchInfo = ref("点击进行人机验证");
       let captchRes = ref(false);
       let captch = () => {
         setTimeout(() => {
           captchInfo.value = "人机验证已通过";
+          context.emit("update:robotCheck", true);
         }, 500);
         captchInfo.value = "人机验证中...";
         captchRes.value = true;

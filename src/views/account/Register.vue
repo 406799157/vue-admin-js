@@ -2,38 +2,41 @@
   <div class="account">
     <div class="form-wrap">
       <a-form
+        ref="regisForm"
         :wrapper-col="layout.wrapperCol"
         :model="regisInfo"
-        :rules="loginRules"
+        :rules="registerRules"
         @finish="handleFinish"
         @finishFailed="handleFinishFailed"
       >
       
         <label>用户名：</label>
         <a-form-item has-feedback name="username">
-          <a-input type="text" v-model:value="regisInfo.username" autocomplete="off" style="width:100%" />
+          <a-input type="text" :maxLength="11" v-model:value="regisInfo.username" autocomplete="off" />
         </a-form-item>
         <label>密码：</label>
-        <a-form-item>
-          <a-input type="password" v-model:value="regisInfo.password" autocomplete="off" />
+        <a-form-item has-feedback name="password">
+          <a-input-password :maxLength="20" v-model:value="regisInfo.password" autocomplete="off" />
         </a-form-item>
         <label>确认密码：</label>
-        <a-form-item>
-          <a-input type="passwords" v-model:value="regisInfo.passwords" autocomplete="off" />
+        <a-form-item has-feedback name="passwords">
+          <a-input-password :maxLength="20" v-model:value="regisInfo.passwords" autocomplete="off" />
         </a-form-item>
         <label>验证码：</label>
-        <a-form-item>
-          <a-row gutter=10>
-            <a-col :span=14>
-              <a-input type="text" v-model:value="regisInfo.verifyCode" autocomplete="off" />
-            </a-col>
-            <a-col :span=10>
+        <a-row :gutter=10>
+          <a-col :span=14>
+            <a-form-item has-feedback name="verifyCode">
+              <a-input type="text" :maxLength="6" v-model:value="regisInfo.verifyCode" autocomplete="off" />
+            </a-form-item>
+          </a-col>
+          <a-col :span=10>
+            <a-form-item>
               <a-button type="primary" block>获取验证码</a-button>
-            </a-col>
-          </a-row>
-        </a-form-item>
+            </a-form-item>
+          </a-col>
+        </a-row>
         <a-form-item>
-          <captch />
+          <captch v-model:robotCheck="regisInfo.robotCheck" />
         </a-form-item>
         <a-form-item>
           <a-button type="primary" html-type="submit" block>注册</a-button>
@@ -49,15 +52,16 @@
 
 <script>
 import Captch from "@/components/captch/Captch.vue";
-import { verifyPhone } from "@/utils/verify";
-import { reactive, toRefs } from "vue";
+import { verifyPhone, verifyPassword, verifyCode } from "@/utils/verify";
+import { ref, reactive, toRefs } from "vue";
 
   export default {
-    name: "Login",
+    name: "Register",
     components: {
       Captch
     },
     setup(props) {
+      const regisForm = ref();
       let formConfig = reactive({
         layout: {
           labelCol: { span: 4 },
@@ -67,27 +71,62 @@ import { reactive, toRefs } from "vue";
           username: '',
           password: '',
           passwords: '',
-          verifyCode: ''
+          verifyCode: '',
+          robotCheck: false
         }
       });
       //表单验证func
-      let loginRulesFunc = {
+      let registerRulesFunc = {
         //检查用户名
         async checkUsername(rule, value) {
           if (!verifyPhone(value)) {
             return Promise.reject("请输入正确的用户名（中国大陆11位手机号）");
           }
           return Promise.resolve();
+        },
+        //检查密码
+        async checkPassword(rule, value) {
+          if (!verifyPassword(value)) {
+            return Promise.reject("请输入正确的密码（6-20位数字与字母组合）");
+          }
+          if (formConfig.regisInfo.passwords) {
+            regisForm.value.validateField("passwords");
+          }
+          return Promise.resolve();
+        },
+        //检查再次输入的密码
+        async checkPasswords(rule, value) {
+          if(!verifyPassword(value)) {
+            return Promise.reject("请输入正确的密码（6-20位数字与字母组合）");
+          }
+          if(value != formConfig.regisInfo.password) {
+            return Promise.reject("两次输入的密码不一致");
+          }
+          return Promise.resolve();
+        },
+        //检查验证码
+        async checkCode(rule, value) {
+          if(!verifyCode(value)) {
+            return Promise.reject("验证码输入错误");
+          }
+          return Promise.resolve();
         }
       }
       //表单验证
-      const loginRules = {
-        username: [{ required: true, message: '请输入用户名', trigger: 'blur' },{ validator: loginRulesFunc.checkUsername, trigger: 'blur' }]
+      const registerRules = {
+        username: [{ required: true, message: '请输入用户名', trigger: 'blur' },{ validator: registerRulesFunc.checkUsername, trigger: 'blur' }],
+        password: [{ required: true, message: '请输入密码', trigger: 'blur' },{ validator: registerRulesFunc.checkPassword, trigger: 'blur' }],
+        passwords: [{ required: true, message: '请再次输入密码', trigger: 'blur' },{ validator: registerRulesFunc.checkPasswords, trigger: 'blur' }],
+        verifyCode: [{ required: true, message: '请输入验证码', trigger: 'blur' },{ validator: registerRulesFunc.checkCode, trigger: 'change' }],
+        
       };
       //表单完成
-      let handleFinish = () => {
+      let handleFinish = (value) => {
+        if(!formConfig.regisInfo.robotCheck) {
+          message.warning('请通过人机验证');
+        }
         console.log('表单提交成功');
-        console.log(formConfig.regisInfo);
+        console.log(value);
       };
       //表单提交失败
       let handleFinishFailed = () => {
@@ -95,7 +134,8 @@ import { reactive, toRefs } from "vue";
       };
       return {
         ...toRefs(formConfig),
-        loginRules,
+        regisForm,
+        registerRules,
         handleFinish,
         handleFinishFailed
       }
