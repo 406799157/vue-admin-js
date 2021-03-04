@@ -1,6 +1,6 @@
 /*
   len：长度
-  model： 1 纯数字 2 数字+小写字母 3 数字+大写字母 4 数字+字母 5 小写字母 6 小写字母+大写字母 7 大写字母
+  model：
 */
 export function generateRandomStr(len = 6, obj = { num: true, lower: true, upper: true }) {
   let arr = [];
