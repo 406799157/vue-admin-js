@@ -2,6 +2,8 @@
   len：长度
   model：
 */
+import getRandom from "@/utils/getRandomNumber";
+
 export function generateRandomStr(len = 6, obj = { num: true, lower: true, upper: true }) {
   let arr = [];
   let str = "";
@@ -13,11 +15,6 @@ export function generateRandomStr(len = 6, obj = { num: true, lower: true, upper
     str += String.fromCharCode(arr[getRandom(0, arrLen)]);
   }
   return str;
-}
-
-//获取随机数
-const getRandom = (min, max) => {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 const addAscToArr = (arr, min, max) => {

@@ -138,11 +138,11 @@ import { message } from "ant-design-vue";
         verifyCodeInfo.loading = true;
         verifyCodeInfo.text = "发送中";
         setTimeout(() => {
-            verifyCodeInfo.loading = false;
-            verifyCodeInfo.text = (-- verifyCodeInfo.sec) + "秒后重试";
-            message.success("验证码发送成功");
-            message.info("验证码是：" + generateRandomStr(6, { num: true, lower: false, upper: true}));
-            verifyCodeInfo.timer = setInterval(() => {
+          verifyCodeInfo.loading = false;
+          verifyCodeInfo.text = (-- verifyCodeInfo.sec) + "秒后重试";
+          message.success("验证码发送成功");
+          message.info("验证码是：" + generateRandomStr(6, { num: true, lower: false, upper: true}));
+          verifyCodeInfo.timer = setInterval(() => {
             verifyCodeInfo.sec --;
             verifyCodeInfo.text = verifyCodeInfo.sec + "秒后重试";
             if (verifyCodeInfo.sec <= 1) {
@@ -153,8 +153,6 @@ import { message } from "ant-design-vue";
             }
           }, 1000);
         }, 1000);
-        
-
       }
       //表单完成
       let handleFinish = (value) => {
