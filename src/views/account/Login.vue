@@ -76,7 +76,9 @@ import { reactive, ref, toRefs } from "vue";
       }
       let handleFinish = value => {
         if(!formConfig.loginInfo.robotCheck) {
+          message.destroy();
           message.warning("请通过人机验证");
+          handleFinishFailed();
           return;
         }
         console.log("表单提交成功");

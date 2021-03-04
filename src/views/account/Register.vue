@@ -31,7 +31,7 @@
           </a-col>
           <a-col :span=10>
             <a-form-item>
-              <a-button type="primary" block>获取验证码</a-button>
+              <a-button type="primary" :disabled="verifyCodeInfo.disabled" :loading="verifyCodeInfo.loading" @click="getVerifyCode()" block>{{ verifyCodeInfo.text }}</a-button>
             </a-form-item>
           </a-col>
         </a-row>
@@ -53,7 +53,9 @@
 <script>
 import Captch from "@/components/captch/Captch.vue";
 import { verifyPhone, verifyPassword, verifyCode } from "@/utils/verify";
+import { generateRandomStr } from "@/utils/generateStr";
 import { ref, reactive, toRefs } from "vue";
+import { message } from "ant-design-vue";
 
   export default {
     name: "Register",
@@ -68,12 +70,19 @@ import { ref, reactive, toRefs } from "vue";
           wrapperCol: { span: 24 }
         },
         regisInfo: {
-          username: '',
-          password: '',
-          passwords: '',
-          verifyCode: '',
+          username: "",
+          password: "",
+          passwords: "",
+          verifyCode: "",
           robotCheck: false
         }
+      });
+      let verifyCodeInfo = reactive({
+        text: "获取验证码",
+        timer: undefined,
+        sec: 60,
+        disabled: false,
+        loading: false
       });
       //表单验证func
       let registerRulesFunc = {
@@ -114,26 +123,58 @@ import { ref, reactive, toRefs } from "vue";
       }
       //表单验证
       const registerRules = {
-        username: [{ required: true, message: '请输入用户名', trigger: 'blur' },{ validator: registerRulesFunc.checkUsername, trigger: 'blur' }],
-        password: [{ required: true, message: '请输入密码', trigger: 'blur' },{ validator: registerRulesFunc.checkPassword, trigger: 'blur' }],
-        passwords: [{ required: true, message: '请再次输入密码', trigger: 'blur' },{ validator: registerRulesFunc.checkPasswords, trigger: 'blur' }],
-        verifyCode: [{ required: true, message: '请输入验证码', trigger: 'blur' },{ validator: registerRulesFunc.checkCode, trigger: 'change' }],
-        
+        username: [{ required: true, message: "请输入用户名", trigger: "blur" },{ validator: registerRulesFunc.checkUsername, trigger: "blur" }],
+        password: [{ required: true, message: "请输入密码", trigger: "blur" },{ validator: registerRulesFunc.checkPassword, trigger: "blur" }],
+        passwords: [{ required: true, message: "请再次输入密码", trigger: "blur" },{ validator: registerRulesFunc.checkPasswords, trigger: "blur" }],
+        verifyCode: [{ required: true, message: "请输入验证码", trigger: "blur" },{ validator: registerRulesFunc.checkCode, trigger: "change" }],
       };
+      //获取验证码
+      const getVerifyCode = () => {
+        if(verifyCodeInfo.timer) {
+          message.destroy();
+          message.info("等待倒计时结束后重试");
+          return;
+        }
+        verifyCodeInfo.loading = true;
+        verifyCodeInfo.text = "发送中";
+        setTimeout(() => {
+            verifyCodeInfo.loading = false;
+            verifyCodeInfo.text = (-- verifyCodeInfo.sec) + "秒后重试";
+            message.success("验证码发送成功");
+            message.info("验证码是：" + generateRandomStr(6, { num: true, lower: false, upper: true}));
+            verifyCodeInfo.timer = setInterval(() => {
+            verifyCodeInfo.sec --;
+            verifyCodeInfo.text = verifyCodeInfo.sec + "秒后重试";
+            if (verifyCodeInfo.sec <= 1) {
+              clearInterval(verifyCodeInfo.timer);
+              verifyCodeInfo.timer = undefined;
+              verifyCodeInfo.sec = 60;
+              verifyCodeInfo.text = "获取验证码";
+            }
+          }, 1000);
+        }, 1000);
+        
+
+      }
       //表单完成
       let handleFinish = (value) => {
         if(!formConfig.regisInfo.robotCheck) {
-          message.warning('请通过人机验证');
+          message.destroy();
+          message.warning("请通过人机验证");
+          handleFinishFailed();
+          return;
         }
-        console.log('表单提交成功');
+        console.log("表单提交成功");
         console.log(value);
       };
       //表单提交失败
       let handleFinishFailed = () => {
-        console.log('表单提交失败');
+        console.log("表单提交失败");
       };
       return {
         ...toRefs(formConfig),
+        verifyCodeInfo,
+        getVerifyCode,
         regisForm,
         registerRules,
         handleFinish,
