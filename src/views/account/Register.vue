@@ -56,13 +56,15 @@ import { verifyPhone, verifyPassword, verifyCode } from "@/utils/verify";
 import { generateRandomStr } from "@/utils/generateStr";
 import { ref, reactive, toRefs } from "vue";
 import { message } from "ant-design-vue";
+import { useRouter } from "vue-router";
 
   export default {
     name: "Register",
     components: {
       Captch
     },
-    setup(props) {
+    setup(props, context) {
+      const router = useRouter();
       const regisForm = ref();
       let formConfig = reactive({
         layout: {
@@ -155,15 +157,16 @@ import { message } from "ant-design-vue";
         }, 1000);
       }
       //表单完成
-      let handleFinish = (value) => {
+      let handleFinish = value => {
         if(!formConfig.regisInfo.robotCheck) {
           message.destroy();
           message.warning("请通过人机验证");
           handleFinishFailed();
           return;
         }
-        console.log("表单提交成功");
+        // console.log("表单提交成功");
         console.log(value);
+        router.push('/');
       };
       //表单提交失败
       let handleFinishFailed = () => {

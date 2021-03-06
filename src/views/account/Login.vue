@@ -34,9 +34,11 @@
 </template>
 
 <script>
-import Captch from "@/components/captch/Captch.vue";
-import { verifyPhone, verifyPassword, verifyCode } from "@/utils/verify";
-import { reactive, ref, toRefs } from "vue";
+  import Captch from "@/components/captch/Captch.vue";
+  import { verifyPhone, verifyPassword, verifyCode } from "@/utils/verify";
+  import { reactive, ref, toRefs } from "vue";
+  import { message } from "ant-design-vue";
+  import { useRouter } from "vue-router";
 
   export default {
     name: "Login",
@@ -44,6 +46,7 @@ import { reactive, ref, toRefs } from "vue";
       Captch
     },
     setup(props) {
+      const router = useRouter();
       const loginForm = ref();
       const formConfig = reactive({
         layout: {
@@ -81,8 +84,9 @@ import { reactive, ref, toRefs } from "vue";
           handleFinishFailed();
           return;
         }
-        console.log("表单提交成功");
-        console.log(value);
+        // console.log("表单提交成功");
+        // console.log(value);
+        router.push({path: '/'});
       }
       let handleFinishFailed = () => {
         console.log("表单提交失败");
